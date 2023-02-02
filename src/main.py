@@ -5,6 +5,7 @@ import compress
 
 CONFDIR = user_config_dir("simple-backup", None)
 CONFFILE = f"{CONFDIR}/config"
+COMP_METHODS = ["zstd", "zip", "gzip", "xz", "bzip", "lz4", "tar", "none"]
 
 def main():
     # Set up argparser
@@ -30,23 +31,18 @@ def main():
     # Removes the extra file extension as without it would create NAME.zip.zip
     dest_file = args.Destination.replace(f".{comp_method}", "")
 
-    # Check the compression method and create the corresponding archive
-    if comp_method == "zstd":
-        compress.create_zstd(dest_file, orig_file)
-    elif comp_method == "zip":
-        compress.create_zip(dest_file, orig_file)
-    elif comp_method == "gzip":
-        compress.create_gzip(dest_file, orig_file)
-    elif comp_method == "xz":
-        compress.create_xz(dest_file, orig_file)
-    elif comp_method == "bzip":
-        compress.create_bzip(dest_file, orig_file)
-    elif comp_method == "lz4":
-        compress.create_lz4(dest_file, orig_file)
-    elif comp_method == "tar":
-        compress.create_tar(dest_file, orig_file)
-    elif comp_method == "none":
-        compress.copy(dest_file, orig_file)
+    # Loop through the COMP_METHODS list and create the corresponding archive
+    for method in COMP_METHODS:
+        if comp_method == "none":
+            compress.copy(dest_file, orig_file)
+            return 0
+        elif comp_method == method:
+            func = getattr(compress, f"create_{method}")
+            func(dest_file, orig_file)
+            return 0
+
+    # If the compression type isn't supported exit
+    exit("Invalid compression type")
 
 if __name__ == "__main__":
     try:

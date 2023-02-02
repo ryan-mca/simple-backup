@@ -110,8 +110,10 @@ def copy(dest_file: str, orig_file: str):
     """
     from shutil import copytree, copy2
     from os.path import isdir
-
-    if isdir(orig_file):
-        copytree(orig_file, dest_file)
-    else:
-        copy2(orig_file, dest_file)
+    try:
+        if isdir(orig_file):
+            copytree(orig_file, dest_file)
+        else:
+            copy2(orig_file, dest_file)
+    except FileExistsError:
+        print("File / folder exists")
