@@ -17,8 +17,14 @@ def main():
         epilog="Licensed under GPLv3"
     )
 
-    parser.add_argument("Original")
-    parser.add_argument("After")
+    parser.add_argument("Original",
+                        help="Original file/folder")
+    parser.add_argument("Destination",
+                        help="Folder to copy to")
+    parser.add_argument("-c", "--compression",
+                        default="zstd",
+                        required=False,
+                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, LZ4, None")
 
     args = parser.parse_args()
 
