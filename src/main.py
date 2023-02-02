@@ -1,9 +1,5 @@
-import zstd
 import argparse
-from shutil import make_archive, copy2
 from appdirs import user_config_dir
-from os import mkdir
-from os.path import exists
 
 CONFDIR = user_config_dir("simple-backup", None)
 CONFFILE = f"{CONFDIR}/config"
@@ -31,7 +27,6 @@ def main():
     orig_file = args.Original
     # Removes the extra file extension as without it would create NAME.zip.zip
     dest_file = args.Destination.replace(f".{comp_method}", "")
-    print(dest_file)
 
     # Check the compression method and create the corresponding archive
     if comp_method == "zstd":
@@ -48,8 +43,11 @@ def main():
         with open(f"{dest_file}.tar.zst", 'wb') as file:
             file.write(compressed_data)
 
+    elif comp_method == "tar":
+        make_archive(dest_file, "tar", orig_file)
+
     elif comp_method == "zip":
-        make_archive(args.Destination.replace(".zip", ""), "zip", args.Original)
+        make_archive(dest_file, "zip", orig_file)
 
 if __name__ == "__main__":
     try:
