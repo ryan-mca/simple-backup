@@ -1,7 +1,7 @@
 import tarfile
 import zstandard
 import argparse
-from shutil import copy2
+from shutil import make_archive
 from appdirs import user_config_dir
 from os import mkdir
 from os.path import exists
@@ -28,6 +28,10 @@ def main():
 
     args = parser.parse_args()
 
+    comp_method = args.compression.lower()
+
+    if comp_method == "zip":
+        make_archive(args.Destination, "zip", args.Original)
 
 if __name__ == "__main__":
     try:
