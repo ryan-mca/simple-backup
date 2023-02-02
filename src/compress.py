@@ -1,4 +1,4 @@
-from shutil import make_archive, copy2
+from shutil import make_archive
 
 def create_zstd(dest_file: str, orig_file: str):
     """Creates a tarfile compressed with zstd
@@ -8,6 +8,7 @@ def create_zstd(dest_file: str, orig_file: str):
         orig_file (str): The original file / folder
     """
     import zstd
+    from os import remove
 
     # Creates a tar archive
     make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
@@ -22,6 +23,9 @@ def create_zstd(dest_file: str, orig_file: str):
     # Writes the data
     with open(f"{dest_file}.tar.zst", 'wb') as file:
         file.write(compressed_data)
+
+    # Removes the original tarfile
+    remove(f"{dest_file}.tar")
 
 def create_zip(dest_file: str, orig_file: str):
     """Creates a zip archive
@@ -68,6 +72,7 @@ def create_lz4(dest_file: str, orig_file: str):
         orig_file (str): The original file / folder
     """
     import lz4.block
+    from os import remove
 
     # Creates a tar archive
     make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
@@ -82,6 +87,9 @@ def create_lz4(dest_file: str, orig_file: str):
     # Writes the compressed file
     with open(f"{dest_file}.tar.lz4", "wb") as file:
         file.write(compressed_data)
+
+    # Removes the original tarfile
+    remove(f"{dest_file}.tar")
 
 def create_tar(dest_file: str, orig_file: str):
     """_summary_
@@ -100,5 +108,10 @@ def copy(dest_file: str, orig_file: str):
         dest_file (str): The file / folder to create
         orig_file (str): The file / folder to copy
     """
+    from shutil import copytree, copy2
+    from os.path import isdir
 
-    copy2(orig_file, dest_file)
+    if isdir(orig_file):
+        copytree(orig_file, dest_file)
+    else:
+        copy2(orig_file, dest_file)
