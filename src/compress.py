@@ -1,117 +1,82 @@
-from shutil import make_archive
+import tarfile as tf
+import lz4.block
+import zstd
+import zipfile
+import shutil
+from os.path import isdir
+from os import mkdir, remove
 
-def create_zstd(dest_file: str, orig_file: str):
-    """Creates a tarfile compressed with zstd
-
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    import zstd
-    from os import remove
-
-    # Creates a tar archive
-    make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
-
-    # Opens the tar archive and then reads the data
-    with open(f"{dest_file}.tar", 'rb') as file:
-        data = file.read()
-
-    # Compresses the data
-    compressed_data = zstd.compress(data)
-
-    # Writes the data
-    with open(f"{dest_file}.tar.zst", 'wb') as file:
-        file.write(compressed_data)
-
-    # Removes the original tarfile
-    remove(f"{dest_file}.tar")
-
-def create_zip(dest_file: str, orig_file: str):
-    """Creates a zip archive
-
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    make_archive(dest_file, "zip", orig_file)
+COMP_METHODS = ["zstd", "zip", "gzip", "bzip", "xz", "lz4", "tar", "none"]
+FILE_EXT = [".tar.zst", ".zip", ".tar.gz", ".tar.bz2", ".tar.xz", ".tar.lz4", ".tar"]
 
 
-def create_gzip(dest_file: str, orig_file: str):
-    """Creates a tarfile compressed gzip
+def compress(dest_file, orig_file, comp_method):
+    try:
+        if comp_method in COMP_METHODS:
+            eval(f"create_{comp_method}(dest_file, orig_file)")
+        else:
+            exit("Compression mode not supported")
+    except FileNotFoundError:
+        while True:
+            try:
+                for ext in FILE_EXT:
+                    remove(f"{dest_file}{ext}")
+            except FileNotFoundError:
+                pass
+            break
+        exit("File Not Found")
 
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    make_archive(dest_file, "gztar", orig_file)
+def create_tar(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar", "w") as tar:
+        tar.add(orig_file)
 
-def create_xz(dest_file: str, orig_file: str):
-    """Create a tarfile compressed with xz
+def create_gzip(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar.gz", "w:gz") as tar:
+        tar.add(orig_file)
 
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    make_archive(dest_file, "xztar", orig_file)
+def create_bzip(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar.bz2", "w:bz2") as tar:
+        tar.add(orig_file)
 
-def create_bzip(dest_file: str, orig_file: str):
-    """Creates a tarfile compressed with bzip
+def create_xz(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar.xz", "w:xz") as tar:
+        tar.add(orig_file)
 
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    make_archive(dest_file, "bztar", orig_file)
+def create_zstd(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar", "w") as tar:
+        tar.add(orig_file)
 
-def create_lz4(dest_file: str, orig_file: str):
-    """Creates a tarfile compressed with lz4
-
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    import lz4.block
-    from os import remove
-
-    # Creates a tar archive
-    make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
-
-    # Reads the uncompresed data
     with open(f"{dest_file}.tar", "rb") as file:
         data = file.read()
 
-    # Compresses the data
+    remove(f"{dest_file}.tar")
+    compressed_data = zstd.compress(data)
+
+    with open(f"{dest_file}.tar.zst", "wb") as file:
+        file.write(compressed_data)
+
+def create_lz4(dest_file, orig_file):
+    with tf.open(f"{dest_file}.tar", "w") as tar:
+        tar.add(orig_file)
+
+    with open(f"{dest_file}.tar", "rb") as file:
+        data = file.read()
+
+    remove(f"{dest_file}.tar")
     compressed_data = lz4.block.compress(data)
 
-    # Writes the compressed file
     with open(f"{dest_file}.tar.lz4", "wb") as file:
         file.write(compressed_data)
 
-    # Removes the original tarfile
-    remove(f"{dest_file}.tar")
+def create_zip(dest_file, orig_file):
+    with zipfile.ZipFile(f"{dest_file}.zip", "w") as zip:
+        zip.write(orig_file)
 
-def create_tar(dest_file: str, orig_file: str):
-    """_summary_
-
-    Args:
-        dest_file (str): The file to create
-        orig_file (str): The original file / folder
-    """
-    make_archive(dest_file, "tar", orig_file)
-
-
-def copy(dest_file: str, orig_file: str):
-    """Copies the file / folder
-
-    Args:
-        dest_file (str): The file / folder to create
-        orig_file (str): The file / folder to copy
-    """
-    from shutil import copytree, copy2
-    from os.path import isdir
-
-    if isdir(orig_file):
-        copytree(orig_file, dest_file)
-    else:
-        copy2(orig_file, dest_file)
+def create_none(dest_file, orig_file):
+    try:
+        if isdir(orig_file):
+            shutil.copytree(orig_file, dest_file)
+        else:
+            shutil.copy2(orig_file, dest_file)
+    except shutil.SameFileError:
+        exit("Files Must Have Different Names")
