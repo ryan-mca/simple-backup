@@ -1,29 +1,14 @@
-import argparse
 from appdirs import user_config_dir
 
 import compress
+import arg_parse
 
 CONFDIR = user_config_dir("simple-backup", None)
 CONFFILE = f"{CONFDIR}/config"
 COMP_METHODS = ["zstd", "zip", "gzip", "xz", "bzip", "lz4", "tar", "none"]
 
 def main():
-    # Set up argparser
-    parser = argparse.ArgumentParser(
-        prog="Simple-Backup",
-        description="A simple program to backup files.\nSupports several different compression methods",
-        epilog="Licensed under GPLv3"
-    )
-
-    parser.add_argument("Original",
-                        help="Original file/folder")
-    parser.add_argument("Destination",
-                        help="Folder to copy to")
-    parser.add_argument("-c", "--compression",
-                        default="zstd",
-                        required=False,
-                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, XZ, BZIP LZ4, tar, None")
-
+    parser = arg_parse.start_argparse()
     args = parser.parse_args()
 
     comp_method = args.compression.lower()
