@@ -20,3 +20,6 @@ def write_default(dir: str, csvfile: str):
             headers = ["filename", "date_created"]
             writer = csv.DictWriter(file, headers)
             writer.writeheader()
+
+def update_backups(days: int):
+    
