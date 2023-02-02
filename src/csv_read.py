@@ -1,7 +1,9 @@
 import csv
 from os.path import exists
 from os import mkdir
-import datetime
+from datetime import date
+
+TODAY = date.today()
 
 def write_default(dir: str, csvfile: str):
     """Creates a default CSV file
@@ -17,9 +19,24 @@ def write_default(dir: str, csvfile: str):
     # Checks if the CSV file exists and creates a basic one if not
     if not exists(csvfile):
         with open(csvfile, "w") as file:
-            headers = ["filename", "date_created"]
+            headers = ["filename", "date_created", "store_length"]
             writer = csv.DictWriter(file, headers)
             writer.writeheader()
 
-def update_backups(days: int):
-    
+def add_file(days: int, fname: str, csvfile: str):
+    with open(csvfile, "a") as file:
+        writer = csv.DictWriter(file)
+        writer.writerow({"filename": fname,
+                        "date_created": TODAY,
+                        "store_length": days})
+
+def update_files(csvfile: str):
+    with open(csvfile, "r") as file:
+        reader = csv.DictReader(file)
+
+        csvlist = []
+
+        for row in reader:
+            csvlist.append(row)
+
+    print(csvlist[1]["store_length"])

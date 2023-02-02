@@ -20,7 +20,7 @@ def compress(dest_file: str, orig_file: str, comp_method: str):
     """
     try:
         if comp_method in COMP_METHODS:
-            eval(f"create_{comp_method}(dest_file, orig_file)")
+            fname = eval(f"create_{comp_method}(dest_file, orig_file)")
         else:
             exit("Compression mode not supported")
     except FileNotFoundError:
@@ -33,6 +33,8 @@ def compress(dest_file: str, orig_file: str, comp_method: str):
             break
         exit("File Not Found")
 
+    return fname
+
 def create_tar(dest_file: str, orig_file: str):
     """Creates an uncompressed tarfile
 
@@ -40,8 +42,10 @@ def create_tar(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): the file to read
     """
-    with tf.open(f"{dest_file}.tar", "w") as tar:
+    fname = dest_file + ".tar"
+    with tf.open(fname, "w") as tar:
         tar.add(orig_file)
+    return fname
 
 def create_gzip(dest_file: str, orig_file: str):
     """Creates a tarfile compressed with gzip
@@ -50,8 +54,10 @@ def create_gzip(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
-    with tf.open(f"{dest_file}.tar.gz", "w:gz") as tar:
+    fname = dest_file + ".tar.gz"
+    with tf.open(fname, "w:gz") as tar:
         tar.add(orig_file)
+    return fname
 
 def create_bzip(dest_file: str, orig_file: str):
     """Creates a tarfile compressed with bzip2
@@ -60,8 +66,10 @@ def create_bzip(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
-    with tf.open(f"{dest_file}.tar.bz2", "w:bz2") as tar:
+    fname = dest_file + ".tar.bz2"
+    with tf.open(fname, "w:bz2") as tar:
         tar.add(orig_file)
+    return fname
 
 def create_xz(dest_file: str, orig_file: str):
     """Creates a tarfile compressed with xz / lzma
@@ -70,8 +78,10 @@ def create_xz(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
-    with tf.open(f"{dest_file}.tar.xz", "w:xz") as tar:
+    fname = dest_file + ".tar.xz"
+    with tf.open(fname, "w:xz") as tar:
         tar.add(orig_file)
+    return fname
 
 def create_zstd(dest_file: str, orig_file: str):
     """Creates a tarfile compressed with zstd
@@ -80,6 +90,7 @@ def create_zstd(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
+    fname = dest_file + ".tar.zst"
     with tf.open(f"{dest_file}.tar", "w") as tar:
         tar.add(orig_file)
 
@@ -89,7 +100,7 @@ def create_zstd(dest_file: str, orig_file: str):
     remove(f"{dest_file}.tar")
     compressed_data = zstd.compress(data)
 
-    with open(f"{dest_file}.tar.zst", "wb") as file:
+    with open(fname, "wb") as file:
         file.write(compressed_data)
 
 def create_lz4(dest_file: str, orig_file: str):
@@ -99,6 +110,7 @@ def create_lz4(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
+    fname = dest_file + ".tar.lz4"
     with tf.open(f"{dest_file}.tar", "w") as tar:
         tar.add(orig_file)
 
@@ -108,7 +120,7 @@ def create_lz4(dest_file: str, orig_file: str):
     remove(f"{dest_file}.tar")
     compressed_data = lz4.block.compress(data)
 
-    with open(f"{dest_file}.tar.lz4", "wb") as file:
+    with open(fname, "wb") as file:
         file.write(compressed_data)
 
 def create_zip(dest_file: str, orig_file: str):
@@ -118,7 +130,8 @@ def create_zip(dest_file: str, orig_file: str):
         dest_file (str): The file to write
         orig_file (str): The file to read
     """
-    with zipfile.ZipFile(f"{dest_file}.zip", "w") as zip:
+    fname = dest_file + ".zip"
+    with zipfile.ZipFile(fname, "w") as zip:
         zip.write(orig_file)
 
 def create_none(dest_file: str, orig_file: str):
@@ -135,3 +148,4 @@ def create_none(dest_file: str, orig_file: str):
             shutil.copy2(orig_file, dest_file)
     except shutil.SameFileError:
         exit("Files Must Have Different Names")
+    return dest_file
