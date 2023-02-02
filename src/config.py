@@ -2,7 +2,16 @@ import configparser
 from os import mkdir
 from os.path import exists
 
-def parse_configs(conffile):
+def parse_configs(conffile: str):
+    """Parses passes in config file and returns the compression method
+
+    Args:
+        conffile (String): Path to the config file
+
+    Returns:
+        String: The compression method
+    """
+
     config = configparser.ConfigParser()
 
     config.read(conffile)
@@ -11,7 +20,14 @@ def parse_configs(conffile):
 
     return comp_method
 
-def set_default_config(confdir, conffile):
+def set_default_config(confdir: str, conffile: str):
+    """Creates a default config file at the given folder and name
+
+    Args:
+        confdir (String): Dir to create the config file in
+        conffile (String): Path to the config file
+    """
+
     config = configparser.ConfigParser()
 
     if not exists(confdir):
