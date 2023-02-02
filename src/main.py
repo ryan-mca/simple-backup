@@ -1,6 +1,8 @@
 import argparse
 from appdirs import user_config_dir
 
+import compress
+
 CONFDIR = user_config_dir("simple-backup", None)
 CONFFILE = f"{CONFDIR}/config"
 
@@ -19,7 +21,7 @@ def main():
     parser.add_argument("-c", "--compression",
                         default="zstd",
                         required=False,
-                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, LZ4, tar, None")
+                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, XZ, BZIP LZ4, tar, None")
 
     args = parser.parse_args()
 
@@ -30,25 +32,19 @@ def main():
 
     # Check the compression method and create the corresponding archive
     if comp_method == "zstd":
-        # Creates a tar archive
-        make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
-
-        # Opens the tar archive and then reads the data
-        with open(f"{dest_file}.tar", 'rb') as file:
-            data = file.read()
-
-        compressed_data = zstd.compress(data)
-
-        # Writes the data
-        with open(f"{dest_file}.tar.zst", 'wb') as file:
-            file.write(compressed_data)
-
-    elif comp_method == "tar":
-        make_archive(dest_file, "tar", orig_file)
-
+        compress.create_zstd(dest_file, orig_file)
     elif comp_method == "zip":
-        make_archive(dest_file, "zip", orig_file)
-
+        compress.create_zip(dest_file, orig_file)
+    elif comp_method == "gzip":
+        compress.create_gzip(dest_file, orig_file)
+    elif comp_method == "xz":
+        compress.create_xz(dest_file, orig_file)
+    elif comp_method == "bzip":
+        compress.create_bzip(dest_file, orig_file)
+    elif comp_method == "lz4":
+        compress.create_lz4(dest_file, orig_file)
+    elif comp_method == "tar":
+        compress.create_tar(dest_file, orig_file)
 if __name__ == "__main__":
     try:
         main()
