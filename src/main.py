@@ -1,7 +1,6 @@
-import tarfile
-import zstandard
+import zstd
 import argparse
-from shutil import make_archive
+from shutil import make_archive, copy2
 from appdirs import user_config_dir
 from os import mkdir
 from os.path import exists
@@ -24,14 +23,33 @@ def main():
     parser.add_argument("-c", "--compression",
                         default="zstd",
                         required=False,
-                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, LZ4, None")
+                        help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, LZ4, tar, None")
 
     args = parser.parse_args()
 
     comp_method = args.compression.lower()
+    orig_file = args.Original
+    # Removes the extra file extension as without it would create NAME.zip.zip
+    dest_file = args.Destination.replace(f".{comp_method}", "")
+    print(dest_file)
 
-    if comp_method == "zip":
-        make_archive(args.Destination, "zip", args.Original)
+    # Check the compression method and create the corresponding archive
+    if comp_method == "zstd":
+        # Creates a tar archive
+        make_archive(dest_file.replace(".tar", ""), "tar", orig_file)
+
+        # Opens the tar archive and then reads the data
+        with open(f"{dest_file}.tar", 'rb') as file:
+            data = file.read()
+
+        compressed_data = zstd.compress(data)
+
+        # Writes the data
+        with open(f"{dest_file}.tar.zst", 'wb') as file:
+            file.write(compressed_data)
+
+    elif comp_method == "zip":
+        make_archive(args.Destination.replace(".zip", ""), "zip", args.Original)
 
 if __name__ == "__main__":
     try:
