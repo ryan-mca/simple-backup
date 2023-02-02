@@ -16,6 +16,8 @@ def main():
     # Removes the extra file extension as without it would create NAME.zip.zip
     dest_file = args.Destination.replace(f".{comp_method}", "").replace(".tar", "")
 
+    compress.compress(dest_file, orig_file, comp_method)
+
 if __name__ == "__main__":
     try:
         main()
