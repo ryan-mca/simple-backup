@@ -45,6 +45,9 @@ def main():
         compress.create_lz4(dest_file, orig_file)
     elif comp_method == "tar":
         compress.create_tar(dest_file, orig_file)
+    elif comp_method == "none":
+        compress.copy(dest_file, orig_file)
+
 if __name__ == "__main__":
     try:
         main()
