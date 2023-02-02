@@ -2,8 +2,14 @@ import configparser
 from os import mkdir
 from os.path import exists
 
-def parse_configs(confdir, conffile):
-    return
+def parse_configs(conffile):
+    config = configparser.ConfigParser()
+
+    config.read(conffile)
+
+    comp_method = config["Config"]["Compression"]
+
+    return comp_method
 
 def set_default_config(confdir, conffile):
     config = configparser.ConfigParser()
