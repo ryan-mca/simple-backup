@@ -31,11 +31,12 @@ def add_file(days = 7, fname = "", csvfile = ""):
         fname (str): The filename to add
         csvfile (str): The file to write to
     """
-    if fname[0] != "/":
-        fname = f"{getcwd()}{fname.replace('./', '')}"
+    if not fname.startswith("/"):
+        fname = f"{getcwd()}/{fname.replace('./', '')}"
 
     with open(csvfile, "a") as file:
-        writer = csv.DictWriter(file)
+        writer = csv.DictWriter(file, ["filename", "date_created", "store_length"])
+        writer.writeheader()
         writer.writerow({"filename": fname,
                         "date_created": TODAY,
                         "store_length": days})
@@ -43,9 +44,12 @@ def add_file(days = 7, fname = "", csvfile = ""):
 def update_files(csvfile: str):
     with open(csvfile, "r") as file:
         reader = csv.DictReader(file)
-        for row in reader:
-            year, month, day = row["date_created"].split("-", 3)
-            created = datetime.date(int(year), int(month), int(day))
-            day_diff = str(TODAY - created)
-            if (day_diff[0:1].strip() >= row["store_length"]):
-                remove(row["filename"])
+        try:
+            for row in reader:
+                year, month, day = (row["date_created"].split("-"))
+                created = datetime.date(int(year), int(month), int(day))
+                day_diff = str(TODAY - created)
+                if (day_diff[0:1].strip() >= row["store_length"]):
+                    remove(row["filename"])
+        except ValueError:
+            pass
