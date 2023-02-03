@@ -17,6 +17,7 @@ def main():
     dest_file = args.Destination.replace(f".{comp_method}", "").replace(".tar", "")
 
     fname = compress.compress(dest_file, orig_file, comp_method)
+    csv_read.add_file()
     csv_read.update_files(CONFFILE)
 
 if __name__ == "__main__":

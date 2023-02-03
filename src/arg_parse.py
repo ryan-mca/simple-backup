@@ -15,13 +15,9 @@ def start_argparse():
                         default="zstd",
                         required=False,
                         help="Compression method to use. Supports: ZSTD (default), ZIP, GZIP, XZ, BZIP LZ4, tar, None")
-    parser.add_argument("-d", "--dir",
-                        default=None,
-                        required=False,
-                        help="Directory to look for other backups in")
     parser.add_argument("-t", "--time",
                         default=7,
-                        required=False,
+                        required=True,
                         help="Amount of days to keep backups for")
 
     return parser
